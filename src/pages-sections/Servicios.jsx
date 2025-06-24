@@ -3,7 +3,7 @@ import { useState } from "react";
 import Layout from "../components/Layout";
 import ServiciosItem from "../components/ServiciosItem";
 import Title from "../components/Title";
-import { SERVICIOS } from "../utils/Servicios";
+import { SERVICIOS } from "../utils/servicios";
 
 const Servicios = () => {
   const [openIndex, setOpenIndex] = useState(null);
