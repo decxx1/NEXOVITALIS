@@ -206,6 +206,7 @@ const NavMobile = ({ open, setOpen, scrollToSection }) => {
         </Box>
         <Box
           sx={{
+            marginTop: "20px",
             display: "flex",
             gap: "20px",
           }}
