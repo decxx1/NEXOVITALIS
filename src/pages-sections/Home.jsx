@@ -5,6 +5,9 @@ import { Box, Typography } from "@mui/material";
 import { fontStyles, PX } from "../utils";
 import "swiper/css/effect-fade";
 import "swiper/css";
+const env = {
+  phoneFormat: import.meta.env.VITE_PHONE_FORMAT,
+}
 
 export const Home = () => {
   return (
@@ -168,7 +171,9 @@ export const Home = () => {
           alt="cadeid"
           sx={{ width: "80px" }}
         />
-        <CustomButton />
+        <CustomButton 
+          onClick={() => window.open(`https://wa.me/${env.phoneFormat}`, '_blank', 'noopener,noreferrer')}
+        />
       </Box>
     </Box>
   );

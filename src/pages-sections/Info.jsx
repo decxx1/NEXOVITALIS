@@ -2,6 +2,9 @@ import { Box, Typography } from "@mui/material";
 import CustomButton from "../components/CustomButton";
 import Layout from "../components/Layout";
 import { colors } from "../utils";
+const env = {
+  phoneFormat: import.meta.env.VITE_PHONE_FORMAT,
+}
 
 const Info = () => {
   return (
@@ -81,7 +84,10 @@ const Info = () => {
         >
           Contactanos para recibir asesoramiento profesional
         </Typography>
-        <CustomButton variant={2} />
+        <CustomButton
+          variant={2}
+          onClick={() => window.open(`https://wa.me/${env.phoneFormat}`, '_blank', 'noopener,noreferrer')}
+        />
         <Box
           component={"img"}
           src="/dna.png"

@@ -2,9 +2,10 @@
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Button, Typography } from "@mui/material";
 import { colors } from "../utils";
-const CustomButton = ({ variant = 1 }) => {
+const CustomButton = ({ variant = 1, ...props }) => {
   return (
     <Button
+      {...props}
       variant="contained"
       endIcon={
         <WhatsAppIcon

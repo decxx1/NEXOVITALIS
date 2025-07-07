@@ -6,42 +6,42 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { toast } from "sonner";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import axios from "axios";
 
-const phoneRegex = /^(\+?54\s?9?\s?)?([0-9]{2,4})\s?([0-9]{6,8})$/;
 
-const schema = yup.object().shape({
-  name: yup.string().required("El nombre es obligatorio"),
-  email: yup
-    .string()
-    .email("Email inválido")
-    .required("El email es obligatorio"),
-  phone: yup
-    .string()
-    .matches(phoneRegex, "Teléfono inválido")
-    .min(10, "El teléfono debe tener al menos 10 dígitos")
-    .required("El teléfono es obligatorio"),
-  message: yup.string().required("La consulta es obligatoria"),
-});
+
+const env = {
+  phone: import.meta.env.VITE_PHONE,
+  phoneFormat: import.meta.env.VITE_PHONE_FORMAT,
+  email: import.meta.env.VITE_EMAIL,
+  mapUrl: import.meta.env.VITE_MAPURL,
+  address: import.meta.env.VITE_ADDRESS,
+  instagram: import.meta.env.VITE_INSTAGRAM,
+  facebook: import.meta.env.VITE_FACEBOOK,
+  linkedin: import.meta.env.VITE_LINKEDIN,
+  endpoint: import.meta.env.VITE_ENDPOINT,
+}
 
 const contactItems = [
   {
-    href: "https://www.google.com/maps/place/Av.+Perú+1579,+M5500+Ciudad,+Mendoza",
+    href: env.mapUrl,
     icon: "/location.png",
-    text: "Av. Perú 1579, Mendoza Ciudad",
+    text: env.address,
   },
   {
-    href: "tel:+5492615792500",
+    href: `tel:${env.phoneFormat}`,
     icon: "/tel.png",
-    text: "+54 9 261 5 79 2500",
+    text: env.phone,
   },
   {
-    href: "mailto:adm.carimsa@gmail.com",
+    href: `mailto:${env.email}`,
     icon: "/mail.png",
-    text: "adm.carimsa@gmail.com",
+    text: env.email,
   },
 ];
+
 
 const openLink = (url) => {
   window.open(url, "_blank", "noopener,noreferrer");
@@ -51,6 +51,7 @@ const ContactLink = ({ href, icon, text }) => (
   <Box
     component="a"
     href={href}
+    target="_blank"
     sx={{
       textDecoration: "none",
       color: "white",
@@ -65,23 +66,63 @@ const ContactLink = ({ href, icon, text }) => (
     }}
   >
     <Box component="img" src={icon} alt="icon" sx={{ width: 30, height: 30 }} />
-    <Typography sx={{ color: "inherit" }}>{text}</Typography>
+    {text}
   </Box>
 );
 
 const Footer = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const {
     register,
     handleSubmit,
-    formState: { errors },
     reset,
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
-    reset();
+  const onSubmit = async (data) => {
+      if (!executeRecaptcha) {
+        toast.error("No se encontró el reCAPTCHA, actualice la página");
+        //console.error("Execute recaptcha not yet available");
+        return;
+      }
+      
+      // Ejecutar reCAPTCHA y obtener token
+      const token = await executeRecaptcha("submit_form");
+      
+      // Preparar los datos según el formato requerido por el endpoint
+      const formData = {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        message: data.message,
+        secret_key: import.meta.env.VITE_SECRET_KEY,
+        token: token,
+        addressee: env.email, // Email de la página web
+        asunto: `Contacto desde la web - de: ${data.name}`
+      };
+      
+      // Enviar datos del formulario junto con el token de reCAPTCHA
+      axios.post(env.endpoint, formData)
+      .then(function (response) {
+        //console.log(response)
+        if (response.data.success) {
+          toast.success("Gracias por consultar, te responderemos a la brevedad");
+          reset();
+        }
+      })
+      .catch(function (error) {
+        //console.error(error.response.data)
+        if (error.response.data.errors) {
+          const formErrors = error.response.data.errors;
+          for (const field in formErrors) {
+            if (Object.prototype.hasOwnProperty.call(formErrors, field)) {
+              toast.warning(formErrors[field]);
+              break;
+            }
+          }
+        }else if(error.response.data.message){
+          toast.error(error.message)
+        }
+      })
   };
 
   return (
@@ -157,20 +198,26 @@ const Footer = () => {
             ))}
           </Box>
           <Box sx={{ display: "flex", gap: "12px" }}>
-            <FacebookIcon
-              sx={mediaStyles}
-              onClick={() => openLink("https://www.facebook.com/nexovitalis/")}
-            />
-            <InstagramIcon
-              sx={mediaStyles}
-              onClick={() =>
-                openLink("https://www.instagram.com/nexovitalis.mza/")
-              }
-            />
-            <LinkedInIcon
-              sx={mediaStyles}
-              onClick={() => openLink("https://www.nexovitalis.com.ar")}
-            />
+            { env.facebook && (
+              <FacebookIcon
+                sx={mediaStyles}
+                onClick={() => openLink(env.facebook)}
+              />
+            )}
+            { env.instagram && (
+              <InstagramIcon
+                sx={mediaStyles}
+                onClick={() =>
+                  openLink(env.instagram)
+                }
+              />
+            )}
+            { env.linkedin && (
+              <LinkedInIcon
+                sx={mediaStyles}
+                onClick={() => openLink(env.linkedin)}
+              />
+            )}
           </Box>
         </Box>
 
@@ -201,9 +248,6 @@ const Footer = () => {
               placeholder="Nombre y apellido*"
               {...register("name")}
             />
-            {errors.name && (
-              <Typography sx={errorStyles}>{errors.name.message}</Typography>
-            )}
           </Box>
 
           <Box>
@@ -214,9 +258,6 @@ const Footer = () => {
               placeholder="Email*"
               {...register("email")}
             />
-            {errors.email && (
-              <Typography sx={errorStyles}>{errors.email.message}</Typography>
-            )}
           </Box>
 
           <Box>
@@ -227,9 +268,6 @@ const Footer = () => {
               placeholder="Teléfono*"
               {...register("phone")}
             />
-            {errors.phone && (
-              <Typography sx={errorStyles}>{errors.phone.message}</Typography>
-            )}
           </Box>
 
           <Box>
@@ -239,13 +277,13 @@ const Footer = () => {
               placeholder="Consulta*"
               {...register("message")}
             />
-            {errors.message && (
-              <Typography sx={errorStyles}>{errors.message.message}</Typography>
-            )}
           </Box>
 
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button type="submit" variant="contained">
+            <Button 
+              type="submit" 
+              variant="contained"
+            >
               ENVIAR
             </Button>
           </Box>
@@ -367,10 +405,4 @@ const mediaStyles = {
   "&:hover": {
     color: colors.secondary,
   },
-};
-
-const errorStyles = {
-  color: "white",
-  fontSize: "11px",
-  mt: "4px",
 };
