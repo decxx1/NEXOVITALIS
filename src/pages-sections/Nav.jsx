@@ -9,7 +9,14 @@ import { fontStyles, PX } from "../utils";
 import { colors } from "../utils";
 import { useEffect } from "react";
 import { useState } from "react";
-
+const env = {
+  instagram: import.meta.env.VITE_INSTAGRAM,
+  facebook: import.meta.env.VITE_FACEBOOK,
+  linkedin: import.meta.env.VITE_LINKEDIN
+}
+const openLink = (url) => {
+  window.open(url, "_blank", "noopener,noreferrer");
+};
 const Nav = () => {
   const [open, setOpen] = useState(false);
   const [showNav, setShowNav] = useState(true);
@@ -203,9 +210,15 @@ const NavMobile = ({ open, setOpen, scrollToSection }) => {
             gap: "20px",
           }}
         >
-          <FacebookIcon sx={mediaStyles} />
-          <InstagramIcon sx={mediaStyles} />
-          <LinkedInIcon sx={mediaStyles} />
+          { env.facebook &&
+            <FacebookIcon onClick={() => openLink(env.facebook)} sx={mediaStyles} />
+          }
+          { env.instagram &&
+            <InstagramIcon onClick={() => openLink(env.instagram)} sx={mediaStyles} />
+          }
+          { env.linkedin &&
+            <LinkedInIcon onClick={() => openLink(env.linkedin)} sx={mediaStyles} />
+          }
         </Box>
       </Box>
     </Box>
