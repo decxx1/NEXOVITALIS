@@ -1,7 +1,6 @@
-
 # Nexovitalis
 
-Sitio web desarrollado por NAUTIX / www.nautix.com.ar
+Sitio web desarrollado por NAUTIX / www.nautix.com.ar para NEXOVITALIS
 
 ## Stacks
 
