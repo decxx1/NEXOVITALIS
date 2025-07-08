@@ -90,7 +90,7 @@ const Info = () => {
         />
         <Box
           component={"img"}
-          src="/dna.png"
+          src="/dna.webp"
           alt="info"
           sx={{
             position: "absolute",

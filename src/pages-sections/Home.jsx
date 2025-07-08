@@ -63,7 +63,7 @@ export const Home = () => {
             >
               <Box
                 component="img"
-                src="/dna.png"
+                src="/dna.webp"
                 alt="dna"
                 sx={{
                   width: "200px",
@@ -122,7 +122,7 @@ export const Home = () => {
             >
               <Box
                 component="img"
-                src="/dna.png"
+                src="/dna.webp"
                 alt="dna"
                 sx={{
                   width: "200px",
